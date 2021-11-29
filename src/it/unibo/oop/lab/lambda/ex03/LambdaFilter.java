@@ -6,7 +6,11 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -16,8 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
 /**
- * Modify this small program adding new filters.
- * Realize this exercise using as much as possible the Stream library.
+ * Modify this small program adding new filters. Realize this exercise using as
+ * much as possible the Stream library.
  * 
  * 1) Convert to lowercase
  * 
@@ -27,7 +31,8 @@ import javax.swing.JTextArea;
  * 
  * 4) List all the words in alphabetical order
  * 
- * 5) Write the count for each word, e.g. "word word pippo" should output "pippo -> 1 word -> 2"
+ * 5) Write the count for each word, e.g. "word word pippo" should output "pippo
+ * -> 1 word -> 2"
  *
  */
 public final class LambdaFilter extends JFrame {
@@ -35,7 +40,11 @@ public final class LambdaFilter extends JFrame {
     private static final long serialVersionUID = 1760990730218643730L;
 
     private enum Command {
-        IDENTITY("No modifications", Function.identity());
+        IDENTITY("No modifications", Function.identity()), LOWERCASE("Lowercase", LambdaFilter.lowercase()),
+        CHARSCOUNTER("Characters counter", LambdaFilter.charsCounter()),
+        LINESCOUNTER("Lines counter", LambdaFilter.linesCounter()),
+        LISTWORDSORDERED("List all the word in order", LambdaFilter.wordsInOrder()),
+        WORDSCOUNTER("Words counter", LambdaFilter.wordsCounter());
 
         private final String commandName;
         private final Function<String, String> fun;
@@ -53,6 +62,57 @@ public final class LambdaFilter extends JFrame {
         public String translate(final String s) {
             return fun.apply(s);
         }
+    }
+
+    private static Function<String, String> lowercase() {
+        return (w) -> w.toLowerCase();
+    }
+
+    private static Function<String, String> charsCounter() {
+        return (w) -> Long.toString(w.chars().count());
+    }
+
+    private static Function<String, String> linesCounter() {
+        return (w) -> w.equals("") ? "0"
+                                    : Long.toString(w.chars()
+                                                   .filter(c -> c == '\n')
+                                                   .count() + 1);
+    }
+
+    private static Function<String, String> wordsInOrder() {
+        return (w) -> {
+                    ArrayList<String> resAr = new ArrayList<>();
+                    new ArrayList<String>(Arrays.asList(w.split(" ")))
+                                                            .stream()
+                                                            .sorted()
+                                                            .forEach(e -> resAr.add(e));
+                    String res = "";
+                    for (final String s : resAr) {
+                        res = res.concat(s + " ");
+                    }
+                    return res;
+                };
+    }
+
+    private static Function<String, String> wordsCounter() {
+        return (w) -> {
+                        ArrayList<String> ar = new ArrayList<>(Arrays.asList(w.split(" ")));
+                        ArrayList<String> resAr = new ArrayList<>();
+                        ar.stream()
+                            .distinct()
+                            .map(word -> (word.concat(" " + ar.stream()
+                                                                .filter(e -> e.equals(word))
+                                                                .count()
+                                                      )
+                                           )
+                             )
+                            .forEach(e ->  resAr.add(e));
+                        String res = "";
+                        for (final String s : resAr) {
+                            res = res.concat(s + "\n");
+                        }
+                        return res;
+                    };
     }
 
     private LambdaFilter() {
