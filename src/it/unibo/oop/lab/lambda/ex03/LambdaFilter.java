@@ -40,11 +40,44 @@ public final class LambdaFilter extends JFrame {
     private static final long serialVersionUID = 1760990730218643730L;
 
     private enum Command {
-        IDENTITY("No modifications", Function.identity()), LOWERCASE("Lowercase", LambdaFilter.lowercase()),
-        CHARSCOUNTER("Characters counter", LambdaFilter.charsCounter()),
-        LINESCOUNTER("Lines counter", LambdaFilter.linesCounter()),
-        LISTWORDSORDERED("List all the word in order", LambdaFilter.wordsInOrder()),
-        WORDSCOUNTER("Words counter", LambdaFilter.wordsCounter());
+        IDENTITY("No modifications", Function.identity()),
+        LOWERCASE("Lowercase", (w) -> w.toLowerCase()),
+        CHARSCOUNTER("Characters counter", (w) -> Long.toString(w.chars().count())),
+        LINESCOUNTER("Lines counter", (w) -> w.equals("") ? "0"
+            : Long.toString(w.chars()
+                    .filter(c -> c == '\n')
+                    .count() + 1)
+        ),
+        LISTWORDSORDERED("List all the word in order", (w) -> {
+            ArrayList<String> resAr = new ArrayList<>();
+            new ArrayList<String>(Arrays.asList(w.split(" ")))
+                                                    .stream()
+                                                    .sorted()
+                                                    .forEach(e -> resAr.add(e));
+            String res = "";
+            for (final String s : resAr) {
+                res = res.concat(s + " ");
+            }
+            return res;
+        }),
+        WORDSCOUNTER("Words counter", (w) -> {
+            ArrayList<String> ar = new ArrayList<>(Arrays.asList(w.split(" ")));
+            ArrayList<String> resAr = new ArrayList<>();
+            ar.stream()
+                .distinct()
+                .map(word -> (word.concat(" " + ar.stream()
+                                                    .filter(e -> e.equals(word))
+                                                    .count()
+                                          )
+                               )
+                 )
+                .forEach(e ->  resAr.add(e));
+            String res = "";
+            for (final String s : resAr) {
+                res = res.concat(s + "\n");
+            }
+            return res;
+        });
 
         private final String commandName;
         private final Function<String, String> fun;
@@ -62,57 +95,6 @@ public final class LambdaFilter extends JFrame {
         public String translate(final String s) {
             return fun.apply(s);
         }
-    }
-
-    private static Function<String, String> lowercase() {
-        return (w) -> w.toLowerCase();
-    }
-
-    private static Function<String, String> charsCounter() {
-        return (w) -> Long.toString(w.chars().count());
-    }
-
-    private static Function<String, String> linesCounter() {
-        return (w) -> w.equals("") ? "0"
-                                    : Long.toString(w.chars()
-                                                   .filter(c -> c == '\n')
-                                                   .count() + 1);
-    }
-
-    private static Function<String, String> wordsInOrder() {
-        return (w) -> {
-                    ArrayList<String> resAr = new ArrayList<>();
-                    new ArrayList<String>(Arrays.asList(w.split(" ")))
-                                                            .stream()
-                                                            .sorted()
-                                                            .forEach(e -> resAr.add(e));
-                    String res = "";
-                    for (final String s : resAr) {
-                        res = res.concat(s + " ");
-                    }
-                    return res;
-                };
-    }
-
-    private static Function<String, String> wordsCounter() {
-        return (w) -> {
-                        ArrayList<String> ar = new ArrayList<>(Arrays.asList(w.split(" ")));
-                        ArrayList<String> resAr = new ArrayList<>();
-                        ar.stream()
-                            .distinct()
-                            .map(word -> (word.concat(" " + ar.stream()
-                                                                .filter(e -> e.equals(word))
-                                                                .count()
-                                                      )
-                                           )
-                             )
-                            .forEach(e ->  resAr.add(e));
-                        String res = "";
-                        for (final String s : resAr) {
-                            res = res.concat(s + "\n");
-                        }
-                        return res;
-                    };
     }
 
     private LambdaFilter() {
