@@ -45,13 +45,9 @@ public final class MusicGroupImpl implements MusicGroup {
 
     @Override
     public Stream<String> albumInYear(final int year) {
-        Set<String> res = new HashSet<>();
-        albums.forEach((a, y) -> {
-            if (y == year) {
-               res.add(a); 
-            }
-          });
-        return res.stream();
+        return albums.entrySet().stream()
+                                .filter(r -> r.getValue() == year)
+                                .map(r -> r.getKey());
     }
 
     @Override
