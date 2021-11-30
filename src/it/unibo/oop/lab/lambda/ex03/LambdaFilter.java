@@ -6,12 +6,9 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -36,9 +33,11 @@ import javax.swing.JTextArea;
  * -> 1 word -> 2"
  *
  */
+
 public final class LambdaFilter extends JFrame {
 
     private static final long serialVersionUID = 1760990730218643730L;
+    private static final String WORD_SPLITTER = "\\p{Space}|\\p{Punct}";
 
     private enum Command {
         IDENTITY("No modifications", Function.identity()),
@@ -50,12 +49,12 @@ public final class LambdaFilter extends JFrame {
                     .count() + 1)
         ),
         LISTWORDSORDERED("List all the word in order", (w) -> 
-            Arrays.stream(w.split(" "))
+            Arrays.stream(w.split(WORD_SPLITTER))
             .sorted()
             .collect(Collectors.joining("\n"))
         ),
         WORDSCOUNTER("Words counter", (w) -> 
-            Arrays.stream(w.split(" "))
+            Arrays.stream(w.split(WORD_SPLITTER))
             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
             .entrySet().stream()
             .map(r -> r.getKey() + " " + r.getValue())
