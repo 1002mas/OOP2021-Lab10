@@ -54,24 +54,13 @@ public final class LambdaFilter extends JFrame {
             .sorted()
             .collect(Collectors.joining("\n"))
         ),
-        WORDSCOUNTER("Words counter", (w) -> {
-            ArrayList<String> ar = new ArrayList<>(Arrays.asList(w.split(" ")));
-            ArrayList<String> resAr = new ArrayList<>();
-            ar.stream()
-                .distinct()
-                .map(word -> (word.concat(" " + ar.stream()
-                                                    .filter(e -> e.equals(word))
-                                                    .count()
-                                          )
-                               )
-                 )
-                .forEach(e ->  resAr.add(e));
-            String res = "";
-            for (final String s : resAr) {
-                res = res.concat(s + "\n");
-            }
-            return res;
-        });
+        WORDSCOUNTER("Words counter", (w) -> 
+            Arrays.stream(w.split(" "))
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+            .entrySet().stream()
+            .map(r -> r.getKey() + " " + r.getValue())
+            .collect(Collectors.joining("\n"))
+        );
 
         private final String commandName;
         private final Function<String, String> fun;
