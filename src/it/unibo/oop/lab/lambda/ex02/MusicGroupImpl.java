@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -81,22 +82,12 @@ public final class MusicGroupImpl implements MusicGroup {
 
     @Override
     public Optional<String> longestAlbum() {
-        OptionalDouble max =
-                albums.keySet()
-                        .stream()
-                        .mapToDouble(a -> songs.stream()
-                                                .filter(s -> a.equals(s.getAlbumName().orElse(null)))
-                                                .mapToDouble(s -> s.getDuration())
-                                                .sum()
-                                    )
-                        .max();
-        return albums.keySet()
-                .stream()
-                .filter(a -> songs.stream()
-                        .filter(s -> a.equals(s.getAlbumName().orElse(null)))
-                        .mapToDouble(s -> s.getDuration())
-                        .sum() == max.getAsDouble())
-                .findAny();
+        return songs.stream()
+                    .filter(a -> a.getAlbumName().isPresent())
+                    .collect(Collectors.groupingBy(Song::getAlbumName, Collectors.summingDouble(Song::getDuration)))
+                    .entrySet().stream()
+                    .max((r1, r2) -> Double.compare(r1.getValue(), r2.getValue()))
+                    .flatMap(r -> r.getKey());
     }
 
     private static final class Song {
