@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
@@ -48,18 +49,11 @@ public final class LambdaFilter extends JFrame {
                     .filter(c -> c == '\n')
                     .count() + 1)
         ),
-        LISTWORDSORDERED("List all the word in order", (w) -> {
-            ArrayList<String> resAr = new ArrayList<>();
-            new ArrayList<String>(Arrays.asList(w.split(" ")))
-                                                    .stream()
-                                                    .sorted()
-                                                    .forEach(e -> resAr.add(e));
-            String res = "";
-            for (final String s : resAr) {
-                res = res.concat(s + " ");
-            }
-            return res;
-        }),
+        LISTWORDSORDERED("List all the word in order", (w) -> 
+            Arrays.stream(w.split(" "))
+            .sorted()
+            .collect(Collectors.joining("\n"))
+        ),
         WORDSCOUNTER("Words counter", (w) -> {
             ArrayList<String> ar = new ArrayList<>(Arrays.asList(w.split(" ")));
             ArrayList<String> resAr = new ArrayList<>();
